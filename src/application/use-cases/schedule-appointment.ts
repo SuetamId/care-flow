@@ -1,4 +1,4 @@
-import { Result } from '@shared/types'
+import { generateUniqueId, Result, UniqueId } from '@shared/types'
 import { DomainError, ValidationError, NotFoundError, AuthorizationError } from '@shared/errors'
 import { Appointment, AppointmentRepository, TimeSlot } from '@domain/appointment'
 import { PatientRepository } from '@domain/patient'
@@ -52,12 +52,12 @@ export async function scheduleAppointment(
     return Result.fail(timeSlotResult.error)
   }
 
-  const patient = await deps.patientRepository.findById(input.patientId)
+  const patient = await deps.patientRepository.findById(input.patientId as UniqueId)
   if (!patient) {
     return Result.fail(new NotFoundError('Patient', input.patientId))
   }
 
-  const provider = await deps.providerRepository.findById(input.providerId)
+  const provider = await deps.providerRepository.findById(input.providerId as UniqueId)
   if (!provider) {
     return Result.fail(new NotFoundError('Provider', input.providerId))
   }
@@ -67,15 +67,15 @@ export async function scheduleAppointment(
   }
 
   const existingAppointments = await deps.appointmentRepository.findByProviderAndDateRange(
-    input.providerId,
+    input.providerId as UniqueId,
     input.startTime,
     input.endTime
   )
 
   const appointment = Appointment.create({
-    patientId: input.patientId,
-    providerId: input.providerId,
-    clinicId: input.clinicId,
+    patientId: input.patientId as UniqueId,
+    providerId: input.providerId as UniqueId,
+    clinicId: (input.clinicId as UniqueId) ?? generateUniqueId(),
     timeSlot: timeSlotResult.value,
     reason: input.reason,
   })

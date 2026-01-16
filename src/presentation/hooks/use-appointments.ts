@@ -24,31 +24,31 @@ interface UseAppointmentsResult {
 }
 
 export function useAppointments(): UseAppointmentsResult {
-  const { user } = useAuth()
+  const { currentUser } = useAuth()
   const { appointmentRepository, patientRepository, providerRepository } = useRepositories()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<DomainError | null>(null)
 
   const loadAppointments = useCallback(async () => {
-    if (!user) return
+    if (!currentUser) return
 
     setLoading(true)
     setError(null)
 
     try {
-      const result = await getAppointmentsByRole({ appointmentRepository }, user)
+      const result = await getAppointmentsByRole({ appointmentRepository }, currentUser)
       if (result.success) {
         setAppointments(result.value)
       }
     } finally {
       setLoading(false)
     }
-  }, [user, appointmentRepository])
+  }, [currentUser, appointmentRepository])
 
   const schedule = useCallback(
     async (input: Omit<ScheduleAppointmentInput, 'clinicId'>): Promise<boolean> => {
-      if (!user) return false
+      if (!currentUser) return false
 
       setLoading(true)
       setError(null)
@@ -57,7 +57,7 @@ export function useAppointments(): UseAppointmentsResult {
         const result = await scheduleAppointment(
           { ...input, clinicId: getClinicId() },
           { appointmentRepository, patientRepository, providerRepository },
-          user
+          currentUser
         )
 
         if (result.success) {
@@ -71,18 +71,18 @@ export function useAppointments(): UseAppointmentsResult {
         setLoading(false)
       }
     },
-    [user, appointmentRepository, patientRepository, providerRepository, loadAppointments]
+    [currentUser, appointmentRepository, patientRepository, providerRepository, loadAppointments]
   )
 
   const cancel = useCallback(
     async (appointmentId: string): Promise<boolean> => {
-      if (!user) return false
+      if (!currentUser) return false
 
       setLoading(true)
       setError(null)
 
       try {
-        const result = await cancelAppointment({ appointmentId }, { appointmentRepository }, user)
+        const result = await cancelAppointment({ appointmentId }, { appointmentRepository }, currentUser)
 
         if (result.success) {
           await loadAppointments()
@@ -95,18 +95,18 @@ export function useAppointments(): UseAppointmentsResult {
         setLoading(false)
       }
     },
-    [user, appointmentRepository, loadAppointments]
+    [currentUser, appointmentRepository, loadAppointments]
   )
 
   const start = useCallback(
     async (appointmentId: string): Promise<boolean> => {
-      if (!user) return false
+      if (!currentUser) return false
 
       setLoading(true)
       setError(null)
 
       try {
-        const result = await startAppointment({ appointmentId }, { appointmentRepository }, user)
+        const result = await startAppointment({ appointmentId }, { appointmentRepository }, currentUser)
 
         if (result.success) {
           await loadAppointments()
@@ -119,12 +119,12 @@ export function useAppointments(): UseAppointmentsResult {
         setLoading(false)
       }
     },
-    [user, appointmentRepository, loadAppointments]
+    [currentUser, appointmentRepository, loadAppointments]
   )
 
   const complete = useCallback(
     async (appointmentId: string, notes?: string): Promise<boolean> => {
-      if (!user) return false
+      if (!currentUser) return false
 
       setLoading(true)
       setError(null)
@@ -133,7 +133,7 @@ export function useAppointments(): UseAppointmentsResult {
         const result = await completeAppointment(
           { appointmentId, notes },
           { appointmentRepository },
-          user
+          currentUser
         )
 
         if (result.success) {
@@ -147,7 +147,7 @@ export function useAppointments(): UseAppointmentsResult {
         setLoading(false)
       }
     },
-    [user, appointmentRepository, loadAppointments]
+    [currentUser, appointmentRepository, loadAppointments]
   )
 
   return {

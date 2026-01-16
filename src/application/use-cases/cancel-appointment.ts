@@ -1,4 +1,4 @@
-import { Result } from '@shared/types'
+import { Result, UniqueId } from '@shared/types'
 import { NotFoundError, AuthorizationError } from '@shared/errors'
 import { AppointmentRepository, InvalidStatusTransitionError } from '@domain/appointment'
 import { AuthenticatedUser } from '@domain/auth'
@@ -18,7 +18,7 @@ export async function cancelAppointment(
   deps: CancelAppointmentDeps,
   actor: AuthenticatedUser
 ): Promise<Result<void, CancelAppointmentError>> {
-  const appointment = await deps.appointmentRepository.findById(input.appointmentId)
+  const appointment = await deps.appointmentRepository.findById(input.appointmentId as UniqueId)
 
   if (!appointment) {
     return Result.fail(new NotFoundError('Appointment', input.appointmentId))

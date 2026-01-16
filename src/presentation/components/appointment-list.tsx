@@ -27,7 +27,7 @@ interface AppointmentWithDetails extends Appointment {
 }
 
 export function AppointmentList() {
-  const { user } = useAuth()
+  const { currentUser } = useAuth()
   const { patientRepository, providerRepository, isInitialized } = useRepositories()
   const { appointments, loading, error, loadAppointments, cancel, start, complete } =
     useAppointments()
@@ -37,10 +37,10 @@ export function AppointmentList() {
   const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isInitialized && user) {
+    if (isInitialized && currentUser) {
       loadAppointments()
     }
-  }, [isInitialized, user, loadAppointments])
+  }, [isInitialized, currentUser, loadAppointments])
 
   useEffect(() => {
     async function loadDetails() {
@@ -105,32 +105,32 @@ export function AppointmentList() {
   }
 
   const canCancel = (apt: Appointment): boolean => {
-    if (!user) return false
+    if (!currentUser) return false
     if (!apt.status.isScheduled()) return false
-    if (user.isPatient()) return apt.patientId === user.entityId
-    if (user.isAdmin()) return true
+    if (currentUser.isPatient()) return apt.patientId === currentUser.entityId
+    if (currentUser.isAdmin()) return true
     return false
   }
 
   const canStart = (apt: Appointment): boolean => {
-    if (!user) return false
-    if (!user.isProvider()) return false
+    if (!currentUser) return false
+    if (!currentUser.isProvider()) return false
     if (!apt.status.isScheduled()) return false
-    return apt.providerId === user.entityId
+    return apt.providerId === currentUser.entityId
   }
 
   const canComplete = (apt: Appointment): boolean => {
-    if (!user) return false
-    if (!user.isProvider()) return false
+    if (!currentUser) return false
+    if (!currentUser.isProvider()) return false
     if (!apt.status.isInProgress()) return false
-    return apt.providerId === user.entityId
+    return apt.providerId === currentUser.entityId
   }
 
-  if (!user) {
+  if (!currentUser) {
     return <div style={styles.message}>Please log in to view appointments.</div>
   }
 
-  if (!isInitialized || loading) {
+  if (!isInitialized || currentUser || loading) {
     return <div style={styles.message}>Loading appointments...</div>
   }
 

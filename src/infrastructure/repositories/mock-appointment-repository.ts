@@ -3,7 +3,6 @@ import {
   Appointment,
   AppointmentRepository,
   AppointmentFilters,
-  AppointmentStatus,
   TimeSlot,
 } from '@domain/appointment'
 

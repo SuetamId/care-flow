@@ -1,4 +1,4 @@
-import { Result } from '@shared/types'
+import { Result, UniqueId } from '@shared/types'
 import { NotFoundError, AuthorizationError } from '@shared/errors'
 import {
   AppointmentRepository,
@@ -31,7 +31,7 @@ export async function completeAppointment(
     return Result.fail(new AuthorizationError('Only providers can complete appointments'))
   }
 
-  const appointment = await deps.appointmentRepository.findById(input.appointmentId)
+  const appointment = await deps.appointmentRepository.findById(input.appointmentId as UniqueId)
 
   if (!appointment) {
     return Result.fail(new NotFoundError('Appointment', input.appointmentId))
